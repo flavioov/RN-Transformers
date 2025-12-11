@@ -17,37 +17,39 @@ Este projeto demonstra como construir um agente inteligente de Q&A que:
 ## 🏗️ Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Docker Compose                        │
-│                                                          │
-│  ┌──────────────────────┐    ┌─────────────────────┐   │
-│  │   ChromaDB Server    │◄───┤   RAG App           │   │
-│  │   (Vector Store)     │    │   (Chainlit UI)     │   │
-│  │                      │    │                     │   │
-│  │   Port: 8000 (int)   │    │   - PDF Processor   │   │
-│  │   Port: 8001 (ext)   │    │   - LangGraph       │   │
-│  │                      │    │   - Embeddings      │   │
-│  │   Volume Persistente │    │   - Agent           │   │
-│  └──────────────────────┘    │                     │   │
-│                               │   Port: 8000        │   │
-│                               └─────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                      Docker Compose                          │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐   │
+│  │  ChromaDB    │  │   Ollama     │  │   RAG App       │   │
+│  │  (Vector DB) │  │   (LLM)      │  │   (Chainlit)    │   │
+│  │              │  │              │  │                 │   │
+│  │  Port: 8001  │◄─┤  Port: 11434 │◄─┤  - PDF Parser  │   │
+│  │  (external)  │  │  (external)  │  │  - LangGraph    │   │
+│  │              │  │              │  │  - Embeddings   │   │
+│  │  Volume:     │  │  Volume:     │  │  - Agent        │   │
+│  │  chromadb    │  │  ollama      │  │                 │   │
+│  └──────────────┘  └──────────────┘  │  Port: 8000     │   │
+│                                       └─────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ### Componentes Principais
 
-1. **ChromaDB** - Banco de dados vetorial para armazenamento e busca semântica
-2. **LangGraph** - Orquestração do workflow do agente (análise → recuperação → geração)
-3. **Chainlit** - Interface web interativa para chat e upload de PDFs
-4. **LangChain** - Abstrações para LLMs e embeddings
-5. **PyMuPDF** - Extração de texto de PDFs
+1. **Ollama** - LLM local gratuito (llama3, mistral, etc.) - **RECOMENDADO**
+2. **ChromaDB** - Banco de dados vetorial para armazenamento e busca semântica
+3. **LangGraph** - Orquestração do workflow do agente (análise → recuperação → geração)
+4. **Chainlit** - Interface web interativa para chat e upload de PDFs
+5. **LangChain** - Abstrações para LLMs e embeddings
+6. **PyMuPDF** - Extração de texto de PDFs
 
 ## 🚀 Início Rápido
 
 ### Pré-requisitos
 
 - Docker e Docker Compose instalados
-- Chave de API da OpenAI ou Anthropic
+- **8 GB de RAM** (para rodar Ollama com llama3)
+- **Opcional**: Chave de API da OpenAI ou Anthropic (se não quiser usar Ollama)
 
 ### Instalação e Execução
 
@@ -60,7 +62,8 @@ cd project
 2. **Configure as variáveis de ambiente**:
 ```bash
 cp .env.example .env
-# Edite o arquivo .env e adicione suas chaves de API
+# O arquivo já vem configurado para usar Ollama (gratuito)
+# Não precisa de chaves de API!
 ```
 
 3. **Inicie a aplicação**:
@@ -68,13 +71,33 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-4. **Acesse a interface**:
+4. **Baixe o modelo Ollama** (primeira vez apenas):
+```bash
+# Aguarde o Ollama iniciar (1-2 minutos)
+docker-compose logs -f ollama
+
+# Baixar llama3 (~4.7 GB)
+docker exec -it ollama-server ollama pull llama3
+
+# Verificar download
+docker exec -it ollama-server ollama list
+```
+
+5. **Acesse a interface**:
 - **Aplicação Chainlit**: http://localhost:8000
 - **ChromaDB Admin** (opcional): http://localhost:8001
+- **Ollama API** (opcional): http://localhost:11434
 
-5. **Visualize os logs**:
+6. **Visualize os logs**:
 ```bash
+# Todos os serviços
 docker-compose logs -f
+
+# Apenas Ollama
+docker-compose logs -f ollama
+
+# Apenas aplicação
+docker-compose logs -f rag-app
 ```
 
 ## 📖 Como Usar
@@ -105,24 +128,62 @@ As respostas incluem automaticamente:
 
 ## 🛠️ Configuração
 
+### 🦙 Usando Ollama (Padrão - Gratuito)
+
+O projeto vem configurado para usar **Ollama** por padrão, um LLM local e gratuito!
+
+**Modelos suportados**:
+- `llama3` - Recomendado (4.7 GB)
+- `mistral` - Mais rápido (4.1 GB)
+- `phi` - Mais leve (1.6 GB)
+- `codellama` - Para código (3.8 GB)
+
+**Como trocar de modelo**:
+```bash
+# Baixar novo modelo
+docker exec -it ollama-server ollama pull mistral
+
+# Atualizar .env
+LLM_MODEL=mistral
+
+# Reiniciar aplicação
+docker-compose restart rag-app
+```
+
+📖 **Guia completo**: Veja [OLLAMA.md](OLLAMA.md) para detalhes, otimizações e troubleshooting.
+
+### 🔑 Usando APIs Externas (Opcional)
+
+Se preferir usar OpenAI ou Anthropic:
+
+```env
+# Configuração LLM
+LLM_PROVIDER=openai  # ou anthropic
+LLM_MODEL=gpt-4-turbo-preview
+
+# Adicionar chave de API
+OPENAI_API_KEY=sua_chave_aqui
+```
+
 ### Variáveis de Ambiente (.env)
 
 ```env
-# Chaves de API LLM
-OPENAI_API_KEY=sua_chave_openai_aqui
-ANTHROPIC_API_KEY=sua_chave_anthropic_aqui
+# Ollama (LLM Local) - PADRÃO
+OLLAMA_HOST=localhost
+OLLAMA_PORT=11434
+LLM_PROVIDER=ollama
+LLM_MODEL=llama3
 
-# Configuração ChromaDB
+# Opcional: APIs externas
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+
+# ChromaDB
 CHROMA_HOST=localhost
 CHROMA_PORT=8001
 
-# Configuração LLM
-LLM_PROVIDER=openai
-LLM_MODEL=gpt-4-turbo-preview
+# Embeddings
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-
-# Debug
-DEBUG=False
 ```
 
 ### Configuração YAML (config.yaml)

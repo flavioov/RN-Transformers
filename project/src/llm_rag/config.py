@@ -52,12 +52,16 @@ class Config:
 
     def _validar_configuracoes(self):
         """Valida se as configurações obrigatórias estão presentes."""
-        # Validar chave de API do LLM
+        # Validar chave de API do LLM (não obrigatório para Ollama)
         provider = self.llm_provider
         if provider == "openai" and not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY não configurada")
         elif provider == "anthropic" and not self.anthropic_api_key:
             raise ValueError("ANTHROPIC_API_KEY não configurada")
+        elif provider == "ollama":
+            # Ollama não requer chave de API, mas validar host
+            if not self.ollama_host:
+                raise ValueError("OLLAMA_HOST não configurado")
 
     # Configurações ChromaDB
     @property
@@ -85,13 +89,14 @@ class Config:
     # Configurações LLM
     @property
     def llm_provider(self) -> str:
-        """Retorna o provedor de LLM (openai ou anthropic)."""
-        return os.getenv("LLM_PROVIDER", "openai")
+        """Retorna o provedor de LLM (openai, anthropic ou ollama)."""
+        return os.getenv("LLM_PROVIDER", "ollama")
 
     @property
     def llm_model(self) -> str:
         """Retorna o modelo LLM a ser usado."""
-        return os.getenv("LLM_MODEL", "gpt-4-turbo-preview")
+        default_model = "llama3" if self.llm_provider == "ollama" else "gpt-4-turbo-preview"
+        return os.getenv("LLM_MODEL", default_model)
 
     @property
     def llm_temperatura(self) -> float:
@@ -117,6 +122,22 @@ class Config:
     def anthropic_api_key(self) -> Optional[str]:
         """Retorna a chave de API da Anthropic."""
         return os.getenv("ANTHROPIC_API_KEY")
+
+    # Configurações Ollama
+    @property
+    def ollama_host(self) -> str:
+        """Retorna o host do servidor Ollama."""
+        return os.getenv("OLLAMA_HOST", "ollama")
+
+    @property
+    def ollama_port(self) -> int:
+        """Retorna a porta do servidor Ollama."""
+        return int(os.getenv("OLLAMA_PORT", "11434"))
+
+    @property
+    def ollama_base_url(self) -> str:
+        """Retorna a URL base do servidor Ollama."""
+        return f"http://{self.ollama_host}:{self.ollama_port}"
 
     # Configurações de Embedding
     @property
