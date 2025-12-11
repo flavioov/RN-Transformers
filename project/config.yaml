@@ -13,8 +13,8 @@ recuperacao:
   usar_reranking: false
 
 # Configurações do LLM
-# Provedores suportados: openai, anthropic, ollama (local)
-# Para Ollama, configure OLLAMA_HOST e OLLAMA_PORT no .env
+# Provedores suportados: openai, anthropic, ollama ou llama (local)
+# Para Ollama/Llama, configure OLLAMA_HOST e OLLAMA_PORT no .env
 llm:
   temperatura: 0.7
   max_tokens: 2000

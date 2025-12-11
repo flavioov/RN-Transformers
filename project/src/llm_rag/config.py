@@ -52,14 +52,14 @@ class Config:
 
     def _validar_configuracoes(self):
         """Valida se as configurações obrigatórias estão presentes."""
-        # Validar chave de API do LLM (não obrigatório para Ollama)
+        # Validar chave de API do LLM (não obrigatório para Ollama/Llama)
         provider = self.llm_provider
         if provider == "openai" and not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY não configurada")
         elif provider == "anthropic" and not self.anthropic_api_key:
             raise ValueError("ANTHROPIC_API_KEY não configurada")
-        elif provider == "ollama":
-            # Ollama não requer chave de API, mas validar host
+        elif provider in ["ollama", "llama"]:
+            # Ollama/Llama não requer chave de API, mas validar host
             if not self.ollama_host:
                 raise ValueError("OLLAMA_HOST não configurado")
 
@@ -89,13 +89,13 @@ class Config:
     # Configurações LLM
     @property
     def llm_provider(self) -> str:
-        """Retorna o provedor de LLM (openai, anthropic ou ollama)."""
+        """Retorna o provedor de LLM (openai, anthropic, ollama ou llama)."""
         return os.getenv("LLM_PROVIDER", "ollama")
 
     @property
     def llm_model(self) -> str:
         """Retorna o modelo LLM a ser usado."""
-        default_model = "llama3" if self.llm_provider == "ollama" else "gpt-4-turbo-preview"
+        default_model = "llama3" if self.llm_provider in ["ollama", "llama"] else "gpt-4-turbo-preview"
         return os.getenv("LLM_MODEL", default_model)
 
     @property

@@ -40,12 +40,12 @@ def criar_llm():
             streaming=config.llm_streaming,
             anthropic_api_key=config.anthropic_api_key,
         )
-    elif provider == "ollama":
+    elif provider in ["ollama", "llama"]:
         return ChatOllama(
             model=config.llm_model,
             temperature=config.llm_temperatura,
             base_url=config.ollama_base_url,
-            # Ollama não usa max_tokens da mesma forma, usa num_predict
+            # Ollama/Llama não usa max_tokens da mesma forma, usa num_predict
             num_predict=config.llm_max_tokens,
         )
     else:
