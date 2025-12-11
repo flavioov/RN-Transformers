@@ -95,7 +95,7 @@ class Config:
     @property
     def llm_model(self) -> str:
         """Retorna o modelo LLM a ser usado."""
-        default_model = "llama3" if self.llm_provider in ["ollama", "llama"] else "gpt-4-turbo-preview"
+        default_model = "llama3.1:8b" if self.llm_provider in ["ollama", "llama"] else "gpt-4-turbo-preview"
         return os.getenv("LLM_MODEL", default_model)
 
     @property

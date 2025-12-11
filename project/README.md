@@ -76,8 +76,8 @@ docker-compose up -d
 # Aguarde o Ollama iniciar (1-2 minutos)
 docker-compose logs -f ollama
 
-# Baixar llama3 (~4.7 GB)
-docker exec -it ollama-server ollama pull llama3
+# Baixar llama3.1:8b (~4.7 GB) - modelo padrão
+docker exec -it ollama-server ollama pull llama3.1:8b
 
 # Verificar download
 docker exec -it ollama-server ollama list
@@ -133,7 +133,8 @@ As respostas incluem automaticamente:
 O projeto vem configurado para usar **Ollama** por padrão, um LLM local e gratuito!
 
 **Modelos suportados**:
-- `llama3` - Recomendado (4.7 GB)
+- `llama3.1:8b` - **Padrão** - Recomendado (4.7 GB)
+- `llama3` - Versão anterior (4.7 GB)
 - `mistral` - Mais rápido (4.1 GB)
 - `phi` - Mais leve (1.6 GB)
 - `codellama` - Para código (3.8 GB)
@@ -172,7 +173,7 @@ OPENAI_API_KEY=sua_chave_aqui
 OLLAMA_HOST=localhost
 OLLAMA_PORT=11434
 LLM_PROVIDER=ollama
-LLM_MODEL=llama3
+LLM_MODEL=llama3.1:8b
 
 # Opcional: APIs externas
 OPENAI_API_KEY=
