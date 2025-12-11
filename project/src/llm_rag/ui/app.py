@@ -3,9 +3,7 @@
 Este módulo implementa a interface web interativa usando Chainlit.
 """
 
-import asyncio
 from pathlib import Path
-from typing import Optional
 
 import chainlit as cl
 
@@ -17,7 +15,7 @@ from llm_rag.config import config
 async def on_chat_start():
     """Callback executado quando uma nova sessão de chat é iniciada."""
     # Mensagem de boas-vindas
-    mensagem_boas_vindas = f"""# 👋 Bem-vindo ao {config.app_name}!
+    mensagem_boas_vindas = f"""# 👋 Bem-vindo ao {config.app_name} !
 
 {config.app_description}
 
@@ -219,9 +217,7 @@ async def on_settings_update(settings):
     Args:
         settings: Novas configurações.
     """
-    await cl.Message(
-        content=f"✅ Configurações atualizadas: {settings}"
-    ).send()
+    await cl.Message(content=f"✅ Configurações atualizadas: {settings}").send()
 
 
 # Configurar settings do Chainlit

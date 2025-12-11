@@ -6,7 +6,7 @@ services:
     image: chromadb/chroma:latest
     container_name: chromadb-server
     volumes:
-      - chromadb-data:/chroma/chroma
+      - /home/flavio/.chroma:/chroma/chroma
     environment:
       - IS_PERSISTENT=TRUE
       - PERSIST_DIRECTORY=/chroma/chroma

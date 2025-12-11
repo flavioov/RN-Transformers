@@ -45,7 +45,9 @@ class Config:
             Dicionário com as configurações carregadas.
         """
         if not caminho.exists():
-            raise FileNotFoundError(f"Arquivo de configuração não encontrado: {caminho}")
+            raise FileNotFoundError(
+                f"Arquivo de configuração não encontrado: {caminho}"
+            )
 
         with open(caminho, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
@@ -91,7 +93,7 @@ class Config:
     @property
     def llm_model(self) -> str:
         """Retorna o modelo LLM a ser usado."""
-        return os.getenv("LLM_MODEL", "gpt-4-turbo-preview")
+        return os.getenv("LLM_MODEL", "llama")
 
     @property
     def llm_temperatura(self) -> float:
@@ -133,9 +135,7 @@ class Config:
     @property
     def chunk_overlap(self) -> int:
         """Retorna a sobreposição entre chunks."""
-        return int(
-            self.config_data.get("chunking", {}).get("sobreposicao_chunk", 200)
-        )
+        return int(self.config_data.get("chunking", {}).get("sobreposicao_chunk", 200))
 
     @property
     def chunk_strategy(self) -> str:
@@ -158,7 +158,9 @@ class Config:
     @property
     def usar_reranking(self) -> bool:
         """Retorna se deve usar re-ranking nos resultados."""
-        return bool(self.config_data.get("recuperacao", {}).get("usar_reranking", False))
+        return bool(
+            self.config_data.get("recuperacao", {}).get("usar_reranking", False)
+        )
 
     # Configurações de Upload
     @property
