@@ -73,10 +73,6 @@ services:
       - OLLAMA_HOST=ollama
       - OLLAMA_PORT=11434
 
-      # LLM API Keys (opcional - apenas se usar openai/anthropic)
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-
       # Configuração LLM
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - LLM_MODEL=${LLM_MODEL:-llama3.1:8b}
