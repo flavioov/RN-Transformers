@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Servidor ChromaDB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb-server
+    volumes:
+      - chromadb-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=False
+    ports:
+      - "8001:8000"  # Expor ChromaDB na porta 8001 do host
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # Aplicação RAG com Chainlit
+  rag-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-chainlit-app
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    volumes:
+      - ./data/uploads:/app/data/uploads
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      # ChromaDB
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+
+      # LLM API Keys (obtenha do .env do host)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # Configuração LLM
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4-turbo-preview}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+
+      # Chainlit
+      - CHAINLIT_HOST=0.0.0.0
+      - CHAINLIT_PORT=8000
+
+      # Debug
+      - DEBUG=${DEBUG:-False}
+    ports:
+      - "8000:8000"  # Expor Chainlit na porta 8000 do host
+    networks:
+      - rag-network
+    restart: unless-stopped
+
+volumes:
+  chromadb-data:
+    driver: local
+    name: rag-chromadb-data
+
+networks:
+  rag-network:
+    driver: bridge
+    name: rag-network

@@ -1,0 +1,68 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.eggs
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.mypy_cache
+.dmypy.json
+dmypy.json
+
+# Virtual environments
+.venv
+venv
+env
+ENV
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Data
+data/chroma/*
+data/uploads/*
+*.db
+*.sqlite
+
+# Tests
+tests/
+.pytest_cache
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Pre-commit
+.pre-commit-config.yaml
+.pre-commit-hooks
+
+# Poetry
+poetry.lock
+
+# Logs
+*.log
+logs/
