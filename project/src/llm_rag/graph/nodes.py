@@ -7,6 +7,7 @@ from typing import Dict, Any
 
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 
@@ -38,6 +39,14 @@ def criar_llm():
             max_tokens=config.llm_max_tokens,
             streaming=config.llm_streaming,
             anthropic_api_key=config.anthropic_api_key,
+        )
+    elif provider in ["ollama", "llama"]:
+        return ChatOllama(
+            model=config.llm_model,
+            temperature=config.llm_temperatura,
+            base_url=config.ollama_base_url,
+            # Ollama/Llama não usa max_tokens da mesma forma, usa num_predict
+            num_predict=config.llm_max_tokens,
         )
     else:
         raise ValueError(f"Provedor LLM não suportado: {provider}")
