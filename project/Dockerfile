@@ -36,6 +36,10 @@ RUN poetry install --no-interaction --no-ansi --no-dev
 # Copiar código fonte
 COPY src/ ./src/
 COPY config.yaml ./
+COPY entrypoint.sh ./
+
+# Tornar o entrypoint executável
+RUN chmod +x /app/entrypoint.sh
 
 # Criar diretórios necessários
 RUN mkdir -p /app/data/uploads /app/data/chroma
@@ -44,8 +48,11 @@ RUN mkdir -p /app/data/uploads /app/data/chroma
 EXPOSE 8000
 
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
+
+# Configurar entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Comando de inicialização
 CMD ["chainlit", "run", "src/llm_rag/ui/app.py", "--host", "0.0.0.0", "--port", "8000"]
