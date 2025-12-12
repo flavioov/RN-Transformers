@@ -28,14 +28,14 @@ async def start():
         cl.user_session.set("message_history", [])
 
         # Mensagem de boas-vindas
-        welcome_message = f""" # 🤓 Bem-vindo ao Simple RAG - Assistente!
+        welcome_message = f""" # 🤓 Bem-vindo ao seu Q&A Agent ! 🤓
 
 **Configuração atual:**
 - 🤖 Modelo: `{settings.ollama_model}`
 - 🗄️ VectorStore: ChromaDB
 - 📍 Ollama URL: `{settings.ollama_base_url}`
 
-Digite sua pergunta para começar!
+Faça upload do seu PDF ou Digite sua pergunta para começar!
 """
 
         await cl.Message(content=welcome_message).send()
