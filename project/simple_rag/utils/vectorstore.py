@@ -5,7 +5,6 @@ from langchain_community.document_loaders import TextLoader
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from simple_rag.utils.data_masking import mask_pii
 from simple_rag.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -17,14 +16,20 @@ def _load_documents(directory: str = "./data/anamnese") -> list:
     for file in Path(directory).glob("*.txt"):
         documents.extend(TextLoader(file).load())
 
-    for doc in documents:
-        doc.page_content = mask_pii(text=doc.page_content, pii_types=["all"])
-
     return documents
 
 
-def _split_documents(documents: list) -> list:
-    """Divide os documentos em chunks."""
+def split_documents(documents: list) -> list:
+    """Split documents into chunks using consistent parameters.
+
+    This function is used for both initial .txt loading and PDF uploads.
+
+    Args:
+        documents: List of documents to split into chunks.
+
+    Returns:
+        List of document chunks.
+    """
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, chunk_overlap=200, add_start_index=True
     )
@@ -32,6 +37,11 @@ def _split_documents(documents: list) -> list:
         "Splitting documents into chunks... chunk_size=1000 and chunk_overlap=200"
     )
     return text_splitter.split_documents(documents)
+
+
+def _split_documents(documents: list) -> list:
+    """Divide os documentos em chunks."""
+    return split_documents(documents)
 
 
 def get_ollama_embedding_function(model: str = "llama3"):
@@ -61,7 +71,8 @@ def get_vectorstore(
     vector_store = Chroma(
         collection_name=collection_name,
         embedding_function=get_ollama_embedding_function(),
-        persist_directory="./chromadb",
+        host="11.7.0.1",
+        port="9001"
     )
     # _load_vectorstore(vector_store)
     return vector_store

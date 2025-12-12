@@ -101,12 +101,12 @@ def should_continue(state: MessagesState) -> Literal["tool_node", "__end__"]:
 
 
 def create_agent():
-    """Cria e compila o agente médico.
+    """Cria e compila o agente.
 
     Returns:
         Agente compilado
     """
-    logger.info("Criando agente médico...")
+    logger.info("Criando agente...")
 
     agent_builder = StateGraph(MessagesState)
 

@@ -19,25 +19,21 @@ async def start():
         # Cria o agente
         agent = create_agent()
 
-        # Armazena o agente na sessão do usuário
+        # Get vectorstore instance for PDF uploads
+        from simple_rag.tools.retriever import vectorstore
+
+        # Armazena o agente E o vectorstore na sessão do usuário
         cl.user_session.set("agent", agent)
+        cl.user_session.set("vectorstore", vectorstore)
         cl.user_session.set("message_history", [])
 
         # Mensagem de boas-vindas
-        welcome_message = f"""# 🏥 Bem-vindo ao Simple RAG - Assistente!
-
-Sou um assistente médico especializado em análise de anamneses. Posso ajudá-lo a:
-
-- 📋 Buscar informações de pacientes em anamneses
-- 🔍 Recuperar históricos médicos
-- 💊 Consultar medicações e alergias
-- 📊 Analisar dados clínicos
+        welcome_message = f""" # 🤓 Bem-vindo ao Simple RAG - Assistente!
 
 **Configuração atual:**
 - 🤖 Modelo: `{settings.ollama_model}`
 - 🗄️ VectorStore: ChromaDB
 - 📍 Ollama URL: `{settings.ollama_base_url}`
-- 🔐 PII Masking: Ativado
 
 Digite sua pergunta para começar!
 """
@@ -63,6 +59,59 @@ Detalhes: {e!s}
 async def main(message: cl.Message):
     """Processa mensagens do usuário."""
     try:
+        # Check if files were uploaded with the message
+        if message.elements:
+            # Filter PDF files
+            pdf_files = [
+                file for file in message.elements if file.mime == "application/pdf"
+            ]
+
+            if pdf_files:
+                # Handle PDF uploads
+                from simple_rag.utils.pdf_processor import process_pdf_files
+
+                processing_msg = cl.Message(
+                    content=f"📄 Processing {len(pdf_files)} PDF file(s)..."
+                )
+                await processing_msg.send()
+
+                # Get vectorstore from session
+                vectorstore = cl.user_session.get("vectorstore")
+
+                if not vectorstore:
+                    processing_msg.content = (
+                        "❌ Vectorstore not initialized. Please reload."
+                    )
+                    await processing_msg.update()
+                    return
+
+                # Define progress callback to update the UI
+                async def update_progress(message: str):
+                    processing_msg.content = message
+                    await processing_msg.update()
+
+                # Process PDFs with progress updates
+                total_chunks, errors = await process_pdf_files(
+                    pdf_files, vectorstore, progress_callback=update_progress
+                )
+
+                # Provide feedback
+                if errors:
+                    content = f"✓ Processed {len(pdf_files) - len(errors)} PDF(s) successfully. {total_chunks} chunks added.\n\n"
+                    content += f"⚠️ {len(errors)} file(s) failed:\n" + "\n".join(
+                        f"• {err}" for err in errors
+                    )
+                else:
+                    content = f"✓ Successfully processed {len(pdf_files)} PDF file(s). {total_chunks} chunks added to knowledge base."
+
+                processing_msg.content = content
+                await processing_msg.update()
+
+                logger.info(
+                    f"PDF upload completed: {total_chunks} chunks added, {len(errors)} errors"
+                )
+                return
+
         # Recupera o agente da sessão
         agent = cl.user_session.get("agent")
         message_history = cl.user_session.get("message_history", [])
@@ -139,9 +188,6 @@ async def main(message: cl.Message):
 async def end():
     """Cleanup quando o chat termina."""
     logger.info("Sessão encerrada")
-
-    # Limpa a sessão
-    cl.user_session.clear()
 
 
 if __name__ == "__main__":
