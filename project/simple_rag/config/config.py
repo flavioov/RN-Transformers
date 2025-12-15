@@ -26,7 +26,7 @@ class Config(BaseSettings):
 
     # Ollama
     ollama_base_url: str = Field(
-        default="http://11.7.0.2:11434", description="URL base do Ollama"
+        default="http://localhost:11434", description="URL base do Ollama"
     )
     ollama_model: str = Field(default="llama3.1:8b", description="Modelo Ollama")
     ollama_temperature: float = Field(

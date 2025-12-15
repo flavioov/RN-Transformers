@@ -6,6 +6,7 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from simple_rag.utils.logger import setup_logger
+from simple_rag.config.config import settings
 
 logger = setup_logger(__name__)
 
@@ -54,7 +55,7 @@ def get_ollama_embedding_function(model: str = "llama3"):
         OllamaEmbeddings instance.
     """
     logger.info(f"Loading Ollama embedding model: {model}")
-    return OllamaEmbeddings(model=model)
+    return OllamaEmbeddings(model=settings.embedding_model)
 
 
 def get_vectorstore(
@@ -69,9 +70,9 @@ def get_vectorstore(
         Chroma vector store instance.
     """
     vector_store = Chroma(
-        collection_name=collection_name,
+        collection_name="my_collection",
         embedding_function=get_ollama_embedding_function(),
-        host="11.7.0.1",
+        host="localhost",
         port="9001"
     )
     # _load_vectorstore(vector_store)

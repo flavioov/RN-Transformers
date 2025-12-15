@@ -7,7 +7,7 @@ services:
     ports:
       - "9001:8000"
     volumes:
-      - ~/.chorma/chromadb-data:/chroma/chroma
+      - ~/.chorma/chroma-data:/chroma/chroma
     environment:
       - ANONYMIZED_TELEMETRY=False
       - ALLOW_RESET=True
