@@ -27,7 +27,7 @@ llm = ChatOllama(
 )
 
 # Ferramentas disponíveis
-tools = [add, multiply, retrieve_context]
+tools = [retrieve_context]
 tools_by_name = {tool.name: tool for tool in tools}
 llm_with_tools = llm.bind_tools(tools)
 

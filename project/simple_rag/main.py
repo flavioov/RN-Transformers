@@ -28,7 +28,7 @@ async def start():
         cl.user_session.set("message_history", [])
 
         # Mensagem de boas-vindas
-        welcome_message = f""" # 🤓 Bem-vindo ao seu Q&A Agent ! 🤓
+        welcome_message = f""" # Bem-vindo ao seu Q&A Agent ! 🤓
 
 **Configuração atual:**
 - 🤖 Modelo: `{settings.ollama_model}`
